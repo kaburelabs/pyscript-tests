@@ -1,0 +1,71 @@
+<html>
+  <head>
+    <title>Plotly</title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="https://pyscript.net/alpha/pyscript.css" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <script defer src="https://pyscript.net/alpha/pyscript.js"></script>
+    <script defer src="https://cdn.plot.ly/plotly-2.10.1.min.js"></script>
+    <py-env>
+      - plotly
+      - pandas
+    </py-env>
+  </head>
+    <body>
+        <div class="jumbotron" style="padding:16px;">
+            <h1>Pyscript - Plotly chart Test</h1>
+            <p class="lead">
+                Rendering simple chart
+            </p>
+        </div>
+        <div class="row">
+            <div class="col-sm-2 p-2 ml-4 mb-1">
+                <div class="">Select chart from list:</div>
+            </div>
+            <div class="col-sm-4 p-2 mr-4 mb-1">
+                <select class="form-control" id="select">
+                    <option value="title-1">Title Test 1</option>
+                    <option value="title-2">Title Test 2</option>
+                    <option value="title-3">Title Test 3</option>
+                    <option value="title-4">Title Test 4</option>        
+                </select>
+            </div>
+            <button type="button" id="btn-select" class="btn btn-primary" onclick="">Select value</button>
+        </div>
+      <div id="plotly"></div>
+
+      <py-script output="plotly">
+from js import Plotly, JSON
+
+import plotly.express as px
+from js import document
+from pyodide import create_proxy
+
+
+def plot_new(val):
+    df = px.data.tips()
+    fig = px.histogram(df, x="total_bill", y="tip", color="sex", marginal="rug",
+                       title=val,  hover_data=df.columns)
+    fig.update_layout(title_x=.5)
+    Plotly.react('plotly', JSON.parse(fig.to_json()))
+
+# Read the value of the select control
+# and call 'plot'
+def selectChange(event):
+    choice = document.getElementById("select").value
+    plot_new(choice)
+
+# set the proxy
+def setup():
+    # Create a JsProxy for the callback function
+    change_proxy = create_proxy(selectChange)
+
+    e = document.getElementById("btn-select")
+    e.addEventListener("click", change_proxy)
+
+setup()
+plot_new('title-1')
+
+      </py-script>
+    </body>
+</html>
